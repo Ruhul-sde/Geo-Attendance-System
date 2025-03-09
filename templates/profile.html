@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+        </div>
+        
+        <div class="profile-cards">
+            <div class="profile-info">
+                <div class="profile-header-bg"></div>
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar }}" alt="{{ user.name }}">
+                        {% else %}
+                        {{ user.name[:1] }}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="profile-user-info">
+                    <h2>{{ user.name }}</h2>
+                    <div class="user-role">{{ user.role|capitalize }}</div>
+                    <div class="employee-id">Employee ID: {{ user.employee_id }}</div>
+                </div>
+                
+                <div class="profile-body">
+                    <div class="info-section">
+                        <h3><i class="fas fa-info-circle"></i> Personal Information</h3>
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">{{ user.name }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ user.email }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value">{{ user.phone }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Address</div>
+                            <div class="info-value">{{ user.address }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h3><i class="fas fa-briefcase"></i> Employment Information</h3>
+                        <div class="info-item">
+                            <div class="info-label">Department</div>
+                            <div class="info-value">{{ user.department }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Position</div>
+                            <div class="info-value">{{ user.position }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Manager</div>
+                            <div class="info-value">{{ user.manager }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Join Date</div>
+                            <div class="info-value">{{ user.join_date }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#editProfileModal">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-outline" data-toggle="modal" data-target="#changePasswordModal">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="profile-card">
+                    <h2><i class="fas fa-chart-pie"></i> Attendance Overview</h2>
+                    <div class="profile-card-content">
+                        <div class="attendance-summary">
+                            <div class="summary-chart">
+                                <!-- Placeholder for chart -->
+                                <div class="chart-placeholder">Attendance Chart</div>
+                            </div>
+                            
+                            <div class="summary-stats">
+                                <div class="stat-box">
+                                    <div class="stat-value">{{ stats.attendance_percentage }}%</div>
+                                    <div class="stat-label">Attendance Rate</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{{ stats.present_days }}</div>
+                                    <div class="stat-label">Present Days</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{{ stats.absent_days }}</div>
+                                    <div class="stat-label">Absent Days</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value">{{ stats.leave_days }}</div>
+                                    <div class="stat-label">Leave Days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-card">
+                    <h2><i class="fas fa-calendar-minus"></i> Leave Balance</h2>
+                    <div class="profile-card-content">
+                        <div class="leave-balance-summary">
+                            <div class="balance-item">
+                                <div class="balance-type">Paid Leave (PL)</div>
+                                <div class="balance-progress">
+                                    <div class="progress-bar" style="width: {{ leaves.pl_percentage }}%"></div>
+                                </div>
+                                <div class="balance-details">
+                                    <span>{{ leaves.pl_used }} used</span>
+                                    <span>{{ leaves.pl_remaining }} remaining</span>
+                                </div>
+                            </div>
+                            
+                            <div class="balance-item">
+                                <div class="balance-type">Casual Leave (CL)</div>
+                                <div class="balance-progress">
+                                    <div class="progress-bar" style="width: {{ leaves.cl_percentage }}%"></div>
+                                </div>
+                                <div class="balance-details">
+                                    <span>{{ leaves.cl_used }} used</span>
+                                    <span>{{ leaves.cl_remaining }} remaining</span>
+                                </div>
+                            </div>
+                            
+                            <div class="balance-item">
+                                <div class="balance-type">Medical Leave (ML)</div>
+                                <div class="balance-progress">
+                                    <div class="progress-bar" style="width: {{ leaves.ml_percentage }}%"></div>
+                                </div>
+                                <div class="balance-details">
+                                    <span>{{ leaves.ml_used }} used</span>
+                                    <span>{{ leaves.ml_remaining }} remaining</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <span class="close" data-dismiss="modal">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form action="/update_profile" method="POST">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" value="{{ user.name }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" value="{{ user.phone }}" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" class="form-control" rows="3">{{ user.address }}</textarea>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <span class="close" data-dismiss="modal">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form action="/change_password" method="POST">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input type="password" id="current_password" name="current_password" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const modals = document.querySelectorAll('.modal');
+            const modalTriggers = document.querySelectorAll('[data-toggle="modal"]');
+            const modalCloses = document.querySelectorAll('[data-dismiss="modal"]');
+            
+            modalTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    document.querySelector(target).style.display = 'flex';
+                });
+            });
+            
+            modalCloses.forEach(close => {
+                close.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            window.addEventListener('click', function(event) {
+                modals.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

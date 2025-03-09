@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="admin-dashboard">
+            <div class="stat-card">
+                <div class="icon icon-blue">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="number">{{ stats.total_employees }}</div>
+                <div class="label">Total Employees</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="icon icon-green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="number">{{ stats.present_today }}</div>
+                <div class="label">Present Today</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="icon icon-orange">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="number">{{ stats.pending_leaves }}</div>
+                <div class="label">Pending Leaves</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="icon icon-red">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="number">{{ stats.absent_today }}</div>
+                <div class="label">Absent Today</div>
+            </div>
+        </div>
+        
+        <h2 class="admin-section-title">Pending Approvals</h2>
+        
+        <div class="card">
+            {% if pending_leaves %}
+                {% for emp_id, leaves in pending_leaves.items() %}
+                    <div class="employee-leaves">
+                        <h3>{{ leaves[list(leaves.keys())[0]].employee_name }}</h3>
+                        <table class="leave-table">
+                            <thead>
+                                <tr>
+                                    <th>Applied On</th>
+                                    <th>Period</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave_id, leave in leaves.items() %}
+                                <tr>
+                                    <td>{{ leave.applied_on }}</td>
+                                    <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+                                    <td><span class="badge badge-{{ leave.type }}">{{ leave.type }}</span></td>
+                                    <td>{{ leave.reason }}</td>
+                                    <td class="actions">
+                                        <button class="btn btn-sm btn-success approve-btn" 
+                                                data-emp-id="{{ emp_id }}" 
+                                                data-leave-id="{{ leave_id }}">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger reject-btn"
+                                                data-emp-id="{{ emp_id }}" 
+                                                data-leave-id="{{ leave_id }}">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No pending leave applications.</p>
+            {% endif %}
+        </div>
+        
+        <h2 class="admin-section-title">Today's Attendance</h2>
+        
+        <div class="card">
+            {% if today_attendance %}
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Check-in Time</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in today_attendance %}
+                    <tr>
+                        <td>{{ emp.name }}</td>
+                        <td>{{ emp.check_in }}</td>
+                        <td>{{ emp.location }}</td>
+                        <td><span class="badge badge-success">Present</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No attendance records for today yet.</p>
+            {% endif %}
+        </div>
+        
+        <h2 class="admin-section-title">Quick Links</h2>
+        
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <h3><i class="fas fa-clipboard-list"></i> Reports</h3>
+                    <ul class="quick-links">
+                        <li><a href="/admin/attendance_report" class="btn-outline"><i class="fas fa-calendar-check"></i> Attendance Reports</a></li>
+                        <li><a href="/admin/leave_reports" class="btn-outline"><i class="fas fa-calendar-minus"></i> Leave Reports</a></li>
+                        <li><a href="/admin/employee_reports" class="btn-outline"><i class="fas fa-user-tag"></i> Employee Reports</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="card">
+                    <h3><i class="fas fa-cogs"></i> Management</h3>
+                    <ul class="quick-links">
+                        <li><a href="/admin/employees" class="btn-outline"><i class="fas fa-users-cog"></i> Manage Employees</a></li>
+                        <li><a href="/admin/locations" class="btn-outline"><i class="fas fa-map-marker-alt"></i> Manage Locations</a></li>
+                        <li><a href="/admin/departments" class="btn-outline"><i class="fas fa-building"></i> Manage Departments</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

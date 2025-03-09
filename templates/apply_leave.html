@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Leave - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <h1>Apply for Leave</h1>
+
+        <div class="card">
+            <form method="post" action="{{ url_for('apply_leave') }}">
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="leave_type">Leave Type:</label>
+                    <select id="leave_type" name="leave_type" class="form-control" required>
+                        {% for type in leave_types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason:</label>
+                    <textarea id="reason" name="reason" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Leave Types:</h3>
+            <ul class="leave-info-list">
+                <li><strong>PL</strong> - Paid Leave: Annual leave with full pay</li>
+                <li><strong>CL</strong> - Casual Leave: Short duration leave for personal matters</li>
+                <li><strong>ML</strong> - Medical Leave: Leave for health reasons (requires medical certificate)</li>
+                <li><strong>Other</strong> - Other types of leave</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

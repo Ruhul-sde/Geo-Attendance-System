@@ -1,0 +1,52 @@
+{
+  "users": {
+    "admin": {
+      "password": "admin123",
+      "name": "Admin User",
+      "role": "admin",
+      "employee_id": "ADMIN001"
+    },
+    "user": {
+      "password": "user123",
+      "name": "Test User",
+      "role": "employee",
+      "employee_id": "EMP001",
+      "manager": "admin"
+    },
+    "abc": {
+      "password": "ZVNDjYBP",
+      "name": "abc",
+      "role": "employee",
+      "employee_id": "EMP002",
+      "manager": "admin"
+    }
+  },
+  "locations": {
+    "loc1": {
+      "name": "Main Office",
+      "latitude": 28.7041,
+      "longitude": 77.1025,
+      "radius": 100
+    },
+    "loc2": {
+      "name": "Branch Office",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "radius": 100
+    }
+  },
+  "attendance": {},
+  "leaves": {
+    "EMP001": {
+      "1ba1dd8c-86a8-4669-8ec7-1759b5887b2b": {
+        "start_date": "2025-03-07",
+        "end_date": "2025-03-09",
+        "reason": "ko",
+        "type": "PL",
+        "status": "pending",
+        "manager": "admin",
+        "applied_on": "2025-03-06"
+      }
+    }
+  }
+}

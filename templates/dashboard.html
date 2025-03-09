@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1><i class="fas fa-tachometer-alt"></i> Welcome, {{ user.name }}</h1>
+        
+        <div class="dashboard-cards">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h2>Today's Attendance</h2>
+                <div class="today-summary">
+                    {% if attendance_today %}
+                        <div class="status-label">
+                            <div class="status-circle"></div>
+                            <span>Status: <span class="badge badge-success">{{ attendance_today.status }}</span></span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-hourglass-start"></i>
+                            <span>Check-in: {{ attendance_today.check_in }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Location: {{ attendance_today.location }}</span>
+                        </div>
+                    {% else %}
+                        <div class="status-label">
+                            <div class="status-circle absent"></div>
+                            <span>Not marked yet</span>
+                        </div>
+                        <button id="markAttendanceBtn" class="btn btn-primary">
+                            <i class="fas fa-check-circle"></i> Mark Attendance
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h2>Attendance Overview</h2>
+                <div class="quick-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.present_days }}</div>
+                        <div class="stat-label">Present Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.absent_days }}</div>
+                        <div class="stat-label">Absent Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.leave_days }}</div>
+                        <div class="stat-label">Leave Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.attendance_percentage }}%</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h2>Quick Links</h2>
+                <ul class="quick-links">
+                    <li><a href="/attendance_report" class="btn-outline">
+                        <i class="fas fa-calendar-check"></i> My Attendance Report
+                    </a></li>
+                    <li><a href="/apply_leave" class="btn-outline">
+                        <i class="fas fa-calendar-plus"></i> Apply for Leave
+                    </a></li>
+                    <li><a href="/leave_status" class="btn-outline">
+                        <i class="fas fa-clipboard-list"></i> Leave Status
+                    </a></li>
+                    {% if user.role == 'admin' %}
+                    <li><a href="/admin/dashboard" class="btn-outline">
+                        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                    </a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-minus"></i>
+                </div>
+                <h2>Pending Leaves</h2>
+                {% if pending_leaves %}
+                    <ul class="leave-list">
+                    {% for leave in pending_leaves %}
+                        <li>
+                            <span class="leave-date">{{ leave.start_date }} to {{ leave.end_date }}</span>
+                            <span class="leave-type badge badge-{{ leave.type }}">{{ leave.type }}</span>
+                            <span class="leave-status {{ leave.status }}">{{ leave.status }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No pending leave requests</p>
+                {% endif %}
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h2>Recent Activity</h2>
+                <div class="activity-timeline">
+                    {% if recent_activities %}
+                        {% for activity in recent_activities %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">{{ activity.time }}</div>
+                            <div class="timeline-title">{{ activity.title }}</div>
+                            <div class="timeline-desc">{{ activity.description }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No recent activities</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <h2>Announcements</h2>
+                {% if announcements %}
+                    <div class="announcements-list">
+                        {% for announcement in announcements %}
+                        <div class="announcement-item">
+                            <h3>{{ announcement.title }}</h3>
+                            <p>{{ announcement.content }}</p>
+                            <small>Posted on {{ announcement.date }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No current announcements</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Select Location</h2>
+            <div id="map" style="width: 100%; height: 300px;"></div>
+            <select id="locationSelect" class="form-control">
+                {% for loc_id, location in locations.items() %}
+                <option value="{{ loc_id }}" data-lat="{{ location.latitude }}" data-lng="{{ location.longitude }}">{{ location.name }}</option>
+                {% endfor %}
+            </select>
+            <button id="confirmLocation" class="btn btn-primary">Mark Attendance</button>
+            <div id="attendanceMessage"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>

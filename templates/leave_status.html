@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Status - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Leave Status</h1>
+        
+        <div class="card">
+            {% if leaves %}
+                <table class="leave-table">
+                    <thead>
+                        <tr>
+                            <th>Applied On</th>
+                            <th>Period</th>
+                            <th>Type</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave_id, leave in leaves.items() %}
+                        <tr>
+                            <td>{{ leave.applied_on }}</td>
+                            <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+                            <td>{{ leave.type }}</td>
+                            <td>{{ leave.reason }}</td>
+                            <td>
+                                <span class="badge badge-{{ leave.status }}">
+                                    {{ leave.status|capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No leave applications found.</p>
+            {% endif %}
+            
+            <div class="form-actions">
+                <a href="/apply_leave" class="btn btn-primary">Apply New Leave</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

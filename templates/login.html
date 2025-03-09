@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <h1><i class="fas fa-map-marker-alt"></i> Geo Attendance</h1>
+            <p>Track attendance with location precision</p>
+        </div>
+
+        <div class="login-card">
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="login-tab">Login</button>
+                <button class="tab-btn" id="signup-tab">Sign Up</button>
+            </div>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div class="success-message">
+                {{ success }}
+            </div>
+            {% endif %}
+
+            <!-- Login Form -->
+            <form id="login-form" action="/login" method="post" class="auth-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <div class="form-links">
+                    <a href="#" id="forgot-password-link">Forgot Password?</a>
+                </div>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" action="/signup" method="post" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="new-username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="new-username" name="username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="fullname"><i class="fas fa-id-card"></i> Full Name</label>
+                    <input type="text" id="fullname" name="fullname" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="new-password" name="password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password"><i class="fas fa-check-circle"></i> Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="location-option"><i class="fas fa-building"></i> Office Location</label>
+                    <select id="location-option" class="form-control" onchange="handleLocationChange()">
+                        <option value="main">Main Office</option>
+                        <option value="branch">Branch Office</option>
+                        <option value="remote">Work From Home</option>
+                        <option value="custom">Custom Location</option>
+                    </select>
+                </div>
+                <div class="form-group location-inputs" id="manual-location-container">
+                    <label><i class="fas fa-map-marker-alt"></i> Location Coordinates</label>
+                    <div class="location-coord-inputs">
+                        <div>
+                            <label for="signup-latitude">Latitude</label>
+                            <input type="number" step="any" id="signup-latitude" name="latitude" class="form-control" required>
+                        </div>
+                        <div>
+                            <label for="signup-longitude">Longitude</label>
+                            <input type="number" step="any" id="signup-longitude" name="longitude" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary btn-block"><i class="fas fa-user-plus"></i> Create Account</button>
+            </form>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div id="forgot-password-modal" class="forgot-password-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h3><i class="fas fa-key"></i> Reset Password</h3>
+                <form action="/reset_password" method="post">
+                    <div class="form-group">
+                        <label for="reset-username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="reset-username" name="username" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn-primary btn-block">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="login-footer">
+        <p>&copy; 2024 Geo Attendance System | Built with <i class="fas fa-heart"></i> for employee tracking</p>
+    </footer>
+
+    <script>
+        // Tab switching
+        document.getElementById('login-tab').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('signup-form').style.display = 'none';
+            document.getElementById('login-tab').classList.add('active');
+            document.getElementById('signup-tab').classList.remove('active');
+        });
+
+        document.getElementById('signup-tab').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('signup-form').style.display = 'block';
+            document.getElementById('login-tab').classList.remove('active');
+            document.getElementById('signup-tab').classList.add('active');
+        });
+
+        // Forgot password modal
+        var modal = document.getElementById('forgot-password-modal');
+        var link = document.getElementById('forgot-password-link');
+        var span = document.getElementsByClassName('close-modal')[0];
+
+        link.onclick = function() {
+            modal.style.display = 'flex';
+        }
+
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Office location coordinates
+        const officeLocations = {
+            main: { lat: 28.7041, lng: 77.1025 },
+            branch: { lat: 28.6139, lng: 77.2090 },
+            remote: { lat: 0, lng: 0 },
+            custom: { lat: null, lng: null }
+        };
+        
+        // Handle location option change for signup
+        function handleLocationChange() {
+            const locationOption = document.getElementById('location-option').value;
+            const latitudeInput = document.getElementById('signup-latitude');
+            const longitudeInput = document.getElementById('signup-longitude');
+            const locationContainer = document.getElementById('manual-location-container');
+            
+            if (locationOption === 'custom') {
+                locationContainer.style.display = 'block';
+                latitudeInput.value = '';
+                longitudeInput.value = '';
+            } else {
+                locationContainer.style.display = 'none';
+                latitudeInput.value = officeLocations[locationOption].lat;
+                longitudeInput.value = officeLocations[locationOption].lng;
+            }
+        }
+        
+        // Handle location option change for login
+        function handleLoginLocationChange() {
+            const locationOption = document.getElementById('login-location-option').value;
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const locationContainer = document.getElementById('login-manual-location-container');
+            
+            if (locationOption === 'custom') {
+                locationContainer.style.display = 'block';
+                latitudeInput.value = '';
+                longitudeInput.value = '';
+            } else {
+                locationContainer.style.display = 'none';
+                latitudeInput.value = officeLocations[locationOption].lat;
+                longitudeInput.value = officeLocations[locationOption].lng;
+            }
+        }
+
+        // Initialize location fields when the page loads
+        window.onload = function() {
+            // Set default values for both forms
+            handleLocationChange();
+            handleLoginLocationChange();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Leaves - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Pending Leave Approvals</h1>
+        
+        <div class="card">
+            {% if pending_leaves %}
+                {% for emp_id, leaves in pending_leaves.items() %}
+                    <div class="employee-leaves">
+                        <h3>{{ leaves[list(leaves.keys())[0]].employee_name }}</h3>
+                        <table class="leave-table">
+                            <thead>
+                                <tr>
+                                    <th>Applied On</th>
+                                    <th>Period</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave_id, leave in leaves.items() %}
+                                <tr>
+                                    <td>{{ leave.applied_on }}</td>
+                                    <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+                                    <td><span class="badge badge-{{ leave.type }}">{{ leave.type }}</span></td>
+                                    <td>{{ leave.reason }}</td>
+                                    <td class="actions">
+                                        <button class="btn btn-sm btn-success approve-btn" 
+                                                data-emp-id="{{ emp_id }}" 
+                                                data-leave-id="{{ leave_id }}">
+                                            Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger reject-btn"
+                                                data-emp-id="{{ emp_id }}" 
+                                                data-leave-id="{{ leave_id }}">
+                                            Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No pending leave applications.</p>
+            {% endif %}
+        </div>
+        
+        <div class="card mt-4">
+            <h3>Leave Types Reference</h3>
+            <ul class="leave-info-list">
+                <li><span class="badge badge-PL">PL</span> - Paid Leave</li>
+                <li><span class="badge badge-CL">CL</span> - Casual Leave</li>
+                <li><span class="badge badge-ML">ML</span> - Medical Leave</li>
+                <li><span class="badge badge-Other">Other</span> - Other types</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

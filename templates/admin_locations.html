@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Locations - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Manage Locations</h1>
+        
+        <div class="card">
+            <h2>Add New Location</h2>
+            <form action="/admin/locations" method="POST" class="location-form">
+                <div class="form-group">
+                    <label for="name">Location Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="latitude">Latitude</label>
+                        <input type="number" step="any" id="latitude" name="latitude" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="longitude">Longitude</label>
+                        <input type="number" step="any" id="longitude" name="longitude" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="radius">Radius (meters)</label>
+                    <input type="number" id="radius" name="radius" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Location</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Existing Locations</h2>
+            <div id="map" style="width: 100%; height: 400px;"></div>
+            
+            {% if locations %}
+                <table class="location-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Radius (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loc_id, location in locations.items() %}
+                        <tr>
+                            <td>{{ location.name }}</td>
+                            <td>{{ location.latitude }}</td>
+                            <td>{{ location.longitude }}</td>
+                            <td>{{ location.radius }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No locations added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/locations.js') }}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Employee Locations - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1>Manage Employee Locations</h1>
+        
+        {% if success %}
+        <div class="success-message">
+            {{ success }}
+        </div>
+        {% endif %}
+        
+        <div class="card">
+            <h2>Update Employee Locations</h2>
+            <p class="text-muted">Set the location where employees can mark attendance from</p>
+            
+            <form action="/admin/employee_locations" method="POST" class="location-form">
+                <div class="form-group">
+                    <label for="username">Select Employee</label>
+                    <select id="username" name="username" class="form-control" required>
+                        {% for username, user in employees.items() %}
+                        <option value="{{ username }}">{{ user.name }} ({{ user.employee_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location_id">Location</label>
+                    <select id="location_id" name="location_id" class="form-control" onchange="toggleCustomLocation()" required>
+                        {% for loc_id, location in locations.items() %}
+                        <option value="{{ loc_id }}">{{ location.name }}</option>
+                        {% endfor %}
+                        <option value="custom">Custom Location</option>
+                    </select>
+                </div>
+                
+                <div id="custom_location_fields" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="custom_latitude">Latitude</label>
+                            <input type="number" step="any" id="custom_latitude" name="custom_latitude" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="custom_longitude">Longitude</label>
+                            <input type="number" step="any" id="custom_longitude" name="custom_longitude" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Location</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card mt-4">
+            <h2>Current Employee Locations</h2>
+            
+            <div class="employee-list">
+                {% for username, user in employees.items() %}
+                <div class="employee-card">
+                    <div class="employee-avatar">{{ user.name[0] }}</div>
+                    <div class="employee-info">
+                        <div class="employee-name">{{ user.name }}</div>
+                        <div class="employee-title">{{ user.employee_id }}</div>
+                        <div class="location-info">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            {% if user.location_name %}
+                                {{ user.location_name }}
+                            {% else %}
+                                No location set
+                            {% endif %}
+                            ({{ user.latitude|default(0, true) }}, {{ user.longitude|default(0, true) }})
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleCustomLocation() {
+            const locationSelect = document.getElementById('location_id');
+            const customFields = document.getElementById('custom_location_fields');
+            
+            if (locationSelect.value === 'custom') {
+                customFields.style.display = 'block';
+            } else {
+                customFields.style.display = 'none';
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleCustomLocation();
+        });
+    </script>
+</body>
+</html>

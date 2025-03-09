@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Attendance Report - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/attendance.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <div class="report-header">
+            <h1><i class="fas fa-calendar-check"></i> Monthly Attendance Report</h1>
+            
+            <div class="date-selector">
+                <div class="month-picker">
+                    <form method="get" action="{{ url_for('attendance_report') }}" class="filter-form" id="monthForm">
+                        <div class="form-group">
+                            <label for="month"><i class="fas fa-calendar-alt"></i> Select Month:</label>
+                            <select name="month" id="month" class="form-control" onchange="this.form.submit()">
+                                {% for m in all_months %}
+                                <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="year-picker">
+                    <label for="year"><i class="fas fa-calendar-day"></i> Year:</label>
+                    <select id="year" class="form-control" onchange="updateMonthOptions()">
+                        {% for y in range(2020, 2031) %}
+                        <option value="{{ y }}" {% if y|string == month.split('-')[0] %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Present Days</h3>
+                    <p class="stat-value">{{ attendance_data|length }}</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Absent Days</h3>
+                    <p class="stat-value">{{ month_dates|length - attendance_data|length }}</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Leave Days</h3>
+                    <p class="stat-value">{{ leaves_data.PL + leaves_data.CL + leaves_data.ML + leaves_data.Other }}</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Attendance %</h3>
+                    <p class="stat-value">
+                        {% if month_dates|length > 0 %}
+                            {{ ((attendance_data|length / month_dates|length) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="report-section">
+            <div class="card leave-card">
+                <h2><i class="fas fa-calendar-minus"></i> Leave Summary</h2>
+                <div class="leave-summary">
+                    <div class="leave-stat">
+                        <span class="leave-label">Paid Leave (PL):</span>
+                        <span class="leave-count">{{ leaves_data.PL }} days</span>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{ leaves_data.PL * 10 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="leave-stat">
+                        <span class="leave-label">Casual Leave (CL):</span>
+                        <span class="leave-count">{{ leaves_data.CL }} days</span>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{ leaves_data.CL * 10 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="leave-stat">
+                        <span class="leave-label">Medical Leave (ML):</span>
+                        <span class="leave-count">{{ leaves_data.ML }} days</span>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{ leaves_data.ML * 10 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="leave-stat">
+                        <span class="leave-label">Other:</span>
+                        <span class="leave-count">{{ leaves_data.Other }} days</span>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {{ leaves_data.Other * 10 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card leave-app-card">
+                <h2><i class="fas fa-file-alt"></i> Leave Applications</h2>
+                <div class="table-responsive">
+                    {% if leave_details %}
+                    <table class="leave-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in leave_details %}
+                            <tr>
+                                <td>{{ leave.start_date }} to {{ leave.end_date }}</td>
+                                <td><span class="leave-type-badge leave-type-{{ leave.type|lower }}">{{ leave.type }}</span></td>
+                                <td><span class="status-badge status-{{ leave.status }}">{{ leave.status }}</span></td>
+                                <td>{{ leave.reason }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-xmark"></i>
+                        <p>No leave applications found for this month.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card attendance-card">
+                <h2><i class="fas fa-clipboard-check"></i> Daily Attendance</h2>
+                <div class="table-responsive">
+                    <table class="attendance-calendar">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Check-in</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for date in month_dates %}
+                            <tr class="{% if date in attendance_data %}present-row{% else %}absent-row{% endif %}">
+                                <td>{{ date }}</td>
+                                {% if date in attendance_data %}
+                                <td><span class="status-badge status-present"><i class="fas fa-check-circle"></i> Present</span></td>
+                                <td><i class="fas fa-clock"></i> {{ attendance_data[date].check_in }}</td>
+                                <td><i class="fas fa-map-marker-alt"></i> {{ attendance_data[date].location }}</td>
+                                {% else %}
+                                <td><span class="status-badge status-absent"><i class="fas fa-times-circle"></i> Absent</span></td>
+                                <td>-</td>
+                                <td>-</td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateMonthOptions() {
+            const year = document.getElementById('year').value;
+            const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+            const selectMonth = document.getElementById('month');
+            
+            // Save current selected month if possible
+            const currentMonth = selectMonth.value.split('-')[1] || '01';
+            
+            // Clear existing options
+            selectMonth.innerHTML = '';
+            
+            // Add new options for each month in selected year
+            months.forEach(month => {
+                const monthValue = `${year}-${month}`;
+                const option = document.createElement('option');
+                option.value = monthValue;
+                option.textContent = monthValue;
+                selectMonth.appendChild(option);
+                
+                // Select the same month in new year if possible
+                if (month === currentMonth) {
+                    option.selected = true;
+                }
+            });
+            
+            // Submit the form to update the report
+            document.getElementById('monthForm').submit();
+        }
+    </script>
+</body>
+</html>

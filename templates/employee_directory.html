@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Directory - Geo Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="container">
+        <h1><i class="fas fa-address-book"></i> Employee Directory</h1>
+        
+        <div class="card">
+            <div class="filters">
+                <div class="search-bar">
+                    <input type="text" id="employeeSearch" placeholder="Search employees..." class="form-control">
+                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                </div>
+                
+                <div class="filter-options">
+                    <select id="departmentFilter" class="form-control">
+                        <option value="">All Departments</option>
+                        <option value="HR">Human Resources</option>
+                        <option value="IT">IT Department</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Operations">Operations</option>
+                    </select>
+                    
+                    <select id="roleFilter" class="form-control">
+                        <option value="">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="employee">Employee</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="employee-grid">
+                {% for employee in employees %}
+                <div class="employee-card">
+                    <div class="employee-avatar">
+                        {% if employee.avatar %}
+                        <img src="{{ employee.avatar }}" alt="{{ employee.name }}">
+                        {% else %}
+                        {{ employee.name[:1] }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="employee-details">
+                        <h3>{{ employee.name }}</h3>
+                        <div class="employee-position">{{ employee.role }}</div>
+                        <div class="employee-id">ID: {{ employee.employee_id }}</div>
+                        
+                        <div class="employee-contact">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>{{ employee.email }}</span>
+                            </div>
+                            
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>{{ employee.phone }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="employee-footer">
+                            <div class="department">{{ employee.department }}</div>
+                            <div class="report-to">Reports to: {{ employee.manager }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('employeeSearch');
+            const departmentFilter = document.getElementById('departmentFilter');
+            const roleFilter = document.getElementById('roleFilter');
+            const employeeCards = document.querySelectorAll('.employee-card');
+            
+            // Search functionality
+            searchInput.addEventListener('keyup', filterEmployees);
+            departmentFilter.addEventListener('change', filterEmployees);
+            roleFilter.addEventListener('change', filterEmployees);
+            
+            function filterEmployees() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const departmentValue = departmentFilter.value.toLowerCase();
+                const roleValue = roleFilter.value.toLowerCase();
+                
+                employeeCards.forEach(card => {
+                    const name = card.querySelector('h3').textContent.toLowerCase();
+                    const department = card.querySelector('.department').textContent.toLowerCase();
+                    const role = card.querySelector('.employee-position').textContent.toLowerCase();
+                    
+                    const matchesSearch = name.includes(searchTerm);
+                    const matchesDepartment = departmentValue === '' || department.includes(departmentValue);
+                    const matchesRole = roleValue === '' || role.includes(roleValue);
+                    
+                    if (matchesSearch && matchesDepartment && matchesRole) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
